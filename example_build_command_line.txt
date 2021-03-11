@@ -1,0 +1,1 @@
+g++ -O2 -Wextra -std=c++17 -o git-credential-gnome-default-keyring git_credential_gnome_default_keyring.cc -pthread -I/usr/include/libsecret-1 -I/usr/include/libmount -I/usr/include/blkid -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -lsecret-1 -lgio-2.0 -lgobject-2.0 -lglib-2.0
