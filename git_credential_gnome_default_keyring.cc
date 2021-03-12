@@ -16,9 +16,9 @@ extern "C"
 
 namespace {
 
-const char* argument_number_error_message_prefix
+constexpr const char* argument_number_error_message_prefix
   {"An action argument was not provided to "};
-const char* exception_message {"An uncaught exception occurred.\n"};
+constexpr const char* exception_message {"An uncaught exception occurred.\n"};
 
 // This regular expression allows the splitting of an input line based on the
 // first occurrence of an equal sign after a non-empty character sequence which
@@ -44,10 +44,15 @@ const std::string path_str {"path"};
 const std::string username_str {"username"};
 const std::string password_str {"password"};
 
-// The following two classes are typical resource management classes. Each is
-// a typical management class for a resource which is accessed through a
+//    The following two classes are typical resource management classes. Each
+// is a typical management class for a resource which is accessed through a
 // pointer once it is acquired and which must be released by calling a special
 // function.
+//    GErrorManager manages a pointer to a structure. This allows operators
+// * and -> to make sense. SecretStringManager manages a C string with special
+// release requirements. Operators * and -> are not appropriate in this case.
+// Both classes are only used with pointers to the appropriate, non-constant
+// type.
 class SecretStringManager
 {
  public:
@@ -63,8 +68,8 @@ class SecretStringManager
   {
     secret_string_manager.secret_string_ptr_ = nullptr;
   }
-  SecretStringManager& operator =(const SecretStringManager&) = delete;
-  inline SecretStringManager& operator =(
+  SecretStringManager& operator=(const SecretStringManager&) = delete;
+  inline SecretStringManager& operator=(
     SecretStringManager&& secret_string_manager) noexcept
   {
     gchar* temp_ptr {secret_string_manager.secret_string_ptr_};
@@ -145,12 +150,12 @@ class GErrorManager
     return g_error_ptr_;
   }
 
-  inline GError& operator *() const noexcept
+  inline GError& operator*() const noexcept
   {
     return *g_error_ptr_;
   }
 
-  inline GError* operator ->() const noexcept
+  inline GError* operator->() const noexcept
   {
     return g_error_ptr_;
   }
@@ -183,7 +188,7 @@ int main(int argc, char* argv[])
   try {
   // This credential helper expects no options and expects an action keyword as
   // the first non-option argument. The allowed action keywords are "get",
-  // "store", and "clear".
+  // "store", and "erase".
   if(argc == 0)
   {
     std::cerr << argument_number_error_message_prefix <<
@@ -286,7 +291,7 @@ int main(int argc, char* argv[])
   bool path_present {path_iter != map_cend};
 
   // Selects an action based on the action keyword (an if-else-if ladder on
-  // the keyord).
+  // the keyword).
   if(std::strcmp(action_keyword_ptr, "get") == 0)
   {
     // Attempts to retrieve credentials.
@@ -450,7 +455,7 @@ int main(int argc, char* argv[])
       }
     }
   }
-  else if(std::strcmp(action_keyword_ptr, "clear") == 0)
+  else if(std::strcmp(action_keyword_ptr, "erase") == 0)
   {
     GError* g_error_ptr {nullptr};
     if(path_present)
@@ -504,7 +509,7 @@ int main(int argc, char* argv[])
   {
     std::cerr << "An unexpected action argument was provided: "
       << action_keyword_ptr << "\nThe allowed actions are get, store, and "
-      "clear.\n";
+      "erase.\n";
     return EXIT_FAILURE;
   }
   return EXIT_SUCCESS;
